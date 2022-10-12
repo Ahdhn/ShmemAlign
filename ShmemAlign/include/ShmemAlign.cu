@@ -3,27 +3,25 @@
 #include <stdio.h>
 #include "gtest/gtest.h"
 
-#include "CUDALib.h"
-
 __global__ void exec_kernel()
 {
-    printf("\n I am thread %d from exec_kernel\n", threadIdx.x);
+    __shared__ char char_ptr[16];
+
+    extern __shared__ char char_ptr_dyn[];
+
+    printf("\n char_ptr= %p, char_ptr+16= %p, char_ptr_dyn= %p\n",
+           (void*)char_ptr,
+           (void*)(char_ptr + 16),
+           (void*)char_ptr_dyn);
 }
 
 TEST(Test, exe)
 {
     exec_kernel<<<1, 1>>>();
     auto err = cudaDeviceSynchronize();
-    EXPECT_EQ(err, cudaSuccess);    
-}
-
-TEST(Test, lib)
-{
-    CUDALib lib;
-    lib.run();
-    auto err = cudaDeviceSynchronize();
     EXPECT_EQ(err, cudaSuccess);
 }
+
 
 int main(int argc, char** argv)
 {
